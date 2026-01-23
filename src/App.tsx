@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index";
+import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Markets from "./pages/Markets";
 import MarketCreate from "./pages/MarketCreate";
@@ -21,7 +22,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/oracle" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/markets" element={<Markets />} />
             <Route

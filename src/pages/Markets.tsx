@@ -56,7 +56,10 @@ export default function Markets() {
 
           <div className="flex items-center gap-2">
             <Button asChild variant="secondary">
-              <Link to="/">Back to Mission Control</Link>
+              <Link to="/">Back to Home</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link to="/oracle">Oracle dashboard</Link>
             </Button>
             <Button asChild disabled={!isAdmin.data}>
               <Link to="/markets/new">Create Market</Link>
