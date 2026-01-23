@@ -4,18 +4,23 @@ import { ReliabilityHeatmap } from "@/components/oracle/ReliabilityHeatmap";
 import { TruthHeader } from "@/components/oracle/TruthHeader";
 import { useOracleAsset } from "@/components/oracle/useOracleAsset";
 import { ProviderStatusPanel } from "@/components/oracle/ProviderStatusPanel";
+import type { OracleDataMode } from "@/components/oracle/OracleDataModeDialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/providers/AuthProvider";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 
 const Index = () => {
   const { user, signOut } = useAuth();
 
-  const btc = useOracleAsset("BTC");
-  const eth = useOracleAsset("ETH");
+  const [mode, setMode] = useLocalStorageState<OracleDataMode>("algooracle:dataMode", "backend");
+  const [cryptoCompareKey, setCryptoCompareKey] = useLocalStorageState<string>("algooracle:cryptoCompareKey", "");
+
+  const btc = useOracleAsset("BTC", { mode, cryptoCompareKey });
+  const eth = useOracleAsset("ETH", { mode, cryptoCompareKey });
 
   const [asset, setAsset] = useState<"BTC" | "ETH">("BTC");
 
@@ -102,7 +107,15 @@ const Index = () => {
                       updatedAt={btc.state.updatedAt}
                       onForceUpdate={btc.forceUpdate}
                     />
-                    <ProviderStatusPanel nodes={btc.state.nodes} isLoading={btc.isLoading} isError={btc.isError} />
+                    <ProviderStatusPanel
+                      nodes={btc.state.nodes}
+                      isLoading={btc.isLoading}
+                      isError={btc.isError}
+                      mode={mode}
+                      onModeChange={setMode}
+                      cryptoCompareKey={cryptoCompareKey}
+                      onCryptoCompareKeyChange={setCryptoCompareKey}
+                    />
                   </div>
                 </TabsContent>
                 <TabsContent value="ETH" className="mt-0 animate-fade-in">
@@ -114,7 +127,15 @@ const Index = () => {
                       updatedAt={eth.state.updatedAt}
                       onForceUpdate={eth.forceUpdate}
                     />
-                    <ProviderStatusPanel nodes={eth.state.nodes} isLoading={eth.isLoading} isError={eth.isError} />
+                    <ProviderStatusPanel
+                      nodes={eth.state.nodes}
+                      isLoading={eth.isLoading}
+                      isError={eth.isError}
+                      mode={mode}
+                      onModeChange={setMode}
+                      cryptoCompareKey={cryptoCompareKey}
+                      onCryptoCompareKeyChange={setCryptoCompareKey}
+                    />
                   </div>
                 </TabsContent>
               </div>
