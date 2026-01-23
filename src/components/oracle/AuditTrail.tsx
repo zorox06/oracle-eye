@@ -38,7 +38,29 @@ export function AuditTrail({ entries }: { entries: AuditEntry[] }) {
         </a>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-border/60">
+      {/* Mobile: stacked entries (no horizontal scroll) */}
+      <div className="mt-4 grid gap-3 sm:hidden">
+        {entries.map((e, idx) => (
+          <div
+            key={`${e.txHash}-${idx}`}
+            className="rounded-lg border border-border/60 bg-card/30 p-3"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">{e.time}</div>
+                <div className="mt-1 font-mono text-sm">{formatUsdCompact(e.finalPrice)}</div>
+              </div>
+              <div className="text-right font-mono text-xs text-muted-foreground">{e.gasFee}</div>
+            </div>
+            <div className="mt-2 truncate font-mono text-xs text-muted-foreground">
+              <span className="story-link">{e.txHash}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/tablet: table */}
+      <div className="mt-4 hidden overflow-hidden rounded-lg border border-border/60 sm:block">
         <Table>
           <TableHeader>
             <TableRow className="bg-card/30">
