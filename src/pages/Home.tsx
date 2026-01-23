@@ -95,11 +95,7 @@ export default function Home() {
 
             <Separator className="my-8" />
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Card className="hover-scale border-border/60 bg-card/40 p-5 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-                <div className="text-sm font-medium">Create markets</div>
-                <p className="mt-2 text-sm text-muted-foreground">Admins can define asset, strike, and expiry.</p>
-              </Card>
+            <div className="grid gap-4 sm:grid-cols-2">
               <Card className="hover-scale border-border/60 bg-card/40 p-5 backdrop-blur supports-[backdrop-filter]:bg-card/30">
                 <div className="text-sm font-medium">Trade (next)</div>
                 <p className="mt-2 text-sm text-muted-foreground">Order book trading for YES/NO shares (coming soon).</p>
