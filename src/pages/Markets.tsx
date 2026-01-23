@@ -53,20 +53,20 @@ export default function Markets() {
           </Link>
 
           <nav className="flex flex-wrap items-center justify-end gap-2">
-            <Button asChild variant="secondary" size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Button asChild variant="secondary" size="sm">
               <Link to="/markets">Markets</Link>
             </Button>
-            <Button asChild variant="secondary" size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Button asChild variant="secondary" size="sm">
               <Link to="/oracle">Oracle</Link>
             </Button>
-            <Button asChild disabled={!isAdmin.data} size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <Button asChild disabled={!isAdmin.data} size="sm">
               <Link to="/markets/new">Create market</Link>
             </Button>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="animate-fade-in flex flex-wrap items-end justify-between gap-6">
           <div className="space-y-2">
             <p className="text-xs tracking-wide text-muted-foreground">Prediction Markets</p>
