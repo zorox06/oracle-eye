@@ -3,9 +3,13 @@ import { ConsensusEngine } from "@/components/oracle/ConsensusEngine";
 import { ReliabilityHeatmap } from "@/components/oracle/ReliabilityHeatmap";
 import { TruthHeader } from "@/components/oracle/TruthHeader";
 import { useOracleSimulation } from "@/components/oracle/useOracleSimulation";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/providers/AuthProvider";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const oracle = useOracleSimulation();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -16,6 +20,27 @@ const Index = () => {
             <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
               Decentralized Data Consensus Dashboard
             </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button asChild variant="secondary" size="sm">
+                <Link to="/markets">Markets</Link>
+              </Button>
+              {user ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    void signOut();
+                  }}
+                >
+                  Sign out
+                </Button>
+              ) : (
+                <Button asChild variant="secondary" size="sm">
+                  <Link to="/auth">Sign in</Link>
+                </Button>
+              )}
+            </div>
           </div>
 
           <TruthHeader
