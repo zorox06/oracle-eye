@@ -4,29 +4,18 @@ import { ReliabilityHeatmap } from "@/components/oracle/ReliabilityHeatmap";
 import { TruthHeader } from "@/components/oracle/TruthHeader";
 import { useOracleAsset } from "@/components/oracle/useOracleAsset";
 import { ProviderStatusPanel } from "@/components/oracle/ProviderStatusPanel";
-import type { OracleDataMode } from "@/components/oracle/OracleDataModeDialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/providers/AuthProvider";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 
 const Index = () => {
   const { user, signOut } = useAuth();
 
-  const [mode, setMode] = useLocalStorageState<OracleDataMode>("algooracle:dataMode", "backend");
-
-  // NOTE: Any VITE_* key is public (bundled into the client). Prefer backend secrets.
-  const envCryptoCompareKey = (import.meta as any)?.env?.VITE_CRYPTOCOMPARE_API_KEY as string | undefined;
-  const [cryptoCompareKey, setCryptoCompareKey] = useLocalStorageState<string>(
-    "algooracle:cryptoCompareKey",
-    envCryptoCompareKey ?? ""
-  );
-
-  const btc = useOracleAsset("BTC", { mode, cryptoCompareKey });
-  const eth = useOracleAsset("ETH", { mode, cryptoCompareKey });
+  const btc = useOracleAsset("BTC");
+  const eth = useOracleAsset("ETH");
 
   const [asset, setAsset] = useState<"BTC" | "ETH">("BTC");
 
@@ -117,10 +106,6 @@ const Index = () => {
                       nodes={btc.state.nodes}
                       isLoading={btc.isLoading}
                       isError={btc.isError}
-                      mode={mode}
-                      onModeChange={setMode}
-                      cryptoCompareKey={cryptoCompareKey}
-                      onCryptoCompareKeyChange={setCryptoCompareKey}
                     />
                   </div>
                 </TabsContent>
@@ -137,10 +122,6 @@ const Index = () => {
                       nodes={eth.state.nodes}
                       isLoading={eth.isLoading}
                       isError={eth.isError}
-                      mode={mode}
-                      onModeChange={setMode}
-                      cryptoCompareKey={cryptoCompareKey}
-                      onCryptoCompareKeyChange={setCryptoCompareKey}
                     />
                   </div>
                 </TabsContent>

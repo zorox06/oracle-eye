@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { OracleNode } from "./types";
-import { OracleDataModeDialog, type OracleDataMode } from "./OracleDataModeDialog";
 
 type ProviderKey = "CoinGecko" | "Binance" | "CryptoCompare";
 
@@ -18,32 +17,16 @@ export function ProviderStatusPanel({
   nodes,
   isLoading,
   isError,
-  mode,
-  onModeChange,
-  cryptoCompareKey,
-  onCryptoCompareKeyChange,
 }: {
   nodes: OracleNode[];
   isLoading: boolean;
   isError: boolean;
-  mode: OracleDataMode;
-  onModeChange: (mode: OracleDataMode) => void;
-  cryptoCompareKey: string;
-  onCryptoCompareKeyChange: (key: string) => void;
 }) {
   return (
     <Card className="border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-medium tracking-wide text-muted-foreground">Provider status</p>
-        <div className="flex items-center gap-2">
-          <p className="text-xs text-muted-foreground">{isError ? "Degraded" : isLoading ? "Syncing" : "Live"}</p>
-          <OracleDataModeDialog
-            mode={mode}
-            onModeChange={onModeChange}
-            cryptoCompareKey={cryptoCompareKey}
-            onCryptoCompareKeyChange={onCryptoCompareKeyChange}
-          />
-        </div>
+        <p className="text-xs text-muted-foreground">{isError ? "Degraded" : isLoading ? "Syncing" : "Live"}</p>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -70,12 +53,6 @@ export function ProviderStatusPanel({
           );
         })}
       </div>
-
-      {mode === "browser" && !cryptoCompareKey && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Browser mode needs your CryptoCompare key (stored locally in this browser).
-        </p>
-      )}
     </Card>
   );
 }
