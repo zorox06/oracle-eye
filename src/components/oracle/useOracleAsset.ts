@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { AuditEntry, HeatmapCell, OracleNode, OracleNodeId, OracleState } from "./types";
+import type { OracleDataMode } from "./OracleDataModeDialog";
 
 type Asset = "BTC" | "ETH";
 
@@ -14,6 +15,72 @@ type OraclePriceResponse = {
   onChainPrice: number;
   isSynced: boolean;
 };
+
+async function safeJson(res: Response) {
+  const text = await res.text();
+  try {
+    return { ok: res.ok, status: res.status, json: JSON.parse(text) };
+  } catch {
+    return { ok: false, status: res.status, json: null };
+  }
+}
+
+function median(values: number[]) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function toNumber(v: unknown) {
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+  return Number.isFinite(n) ? n : null;
+}
+
+async function fetchOracleBrowserDirect(asset: Asset, cryptoCompareKey: string): Promise<OraclePriceResponse> {
+  const cgId = asset === "BTC" ? "bitcoin" : "ethereum";
+  const binanceSymbol = asset === "BTC" ? "BTCUSDT" : "ETHUSDT";
+
+  const coingeckoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${cgId}&vs_currencies=usd`;
+  const binanceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`;
+  const cryptoCompareUrl = `https://min-api.cryptocompare.com/data/price?fsym=${asset}&tsyms=USD`;
+
+  const [cgRes, bnRes, ccRes] = await Promise.all([
+    fetch(coingeckoUrl, { headers: { Accept: "application/json" } }),
+    fetch(binanceUrl, { headers: { Accept: "application/json" } }),
+    fetch(cryptoCompareUrl, {
+      headers: {
+        Accept: "application/json",
+        ...(cryptoCompareKey ? { Authorization: `Apikey ${cryptoCompareKey}` } : {}),
+      },
+    }),
+  ]);
+
+  const cg = await safeJson(cgRes);
+  const bn = await safeJson(bnRes);
+  const cc = await safeJson(ccRes);
+
+  const cgUsd = toNumber(cg.json?.[cgId]?.usd);
+  const bnUsd = toNumber(bn.json?.price);
+  const ccUsd = toNumber(cc.json?.USD);
+
+  const nodes: OracleNode[] = [
+    { id: "A", name: "Node A", source: "CoinGecko", status: cgUsd != null ? "online" : "offline", price: cgUsd ?? 0 },
+    { id: "B", name: "Node B", source: "Binance", status: bnUsd != null ? "online" : "offline", price: bnUsd ?? 0 },
+    { id: "C", name: "Node C", source: "CryptoCompare", status: ccUsd != null ? "online" : "offline", price: ccUsd ?? 0 },
+  ];
+
+  const available = nodes.filter((n) => n.status === "online").map((n) => n.price);
+  const aggregatedPrice = available.length ? Math.round(median(available)) : 0;
+
+  return {
+    asset,
+    updatedAt: new Date().toISOString(),
+    nodes,
+    aggregatedPrice,
+    onChainPrice: aggregatedPrice,
+    isSynced: true,
+  };
+}
 
 function shortHash() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -60,12 +127,24 @@ function normalizeNodes(nodes: OracleNode[]): OracleNode[] {
   ];
 }
 
-export function useOracleAsset(asset: Asset) {
+export function useOracleAsset(
+  asset: Asset,
+  opts?: {
+    mode?: OracleDataMode;
+    cryptoCompareKey?: string;
+  }
+) {
   const maxCycles = 10;
+  const mode = opts?.mode ?? "backend";
+  const cryptoCompareKey = opts?.cryptoCompareKey ?? "";
 
   const query = useQuery({
-    queryKey: ["oracle", "price", asset],
+    queryKey: ["oracle", "price", asset, mode],
     queryFn: async () => {
+      if (mode === "browser") {
+        // No secrets in code: user provides key locally.
+        return await fetchOracleBrowserDirect(asset, cryptoCompareKey);
+      }
       const { data, error } = await supabase.functions.invoke<OraclePriceResponse>("oracle-price", {
         body: { asset },
       });
@@ -163,3 +242,4 @@ export function useOracleAsset(asset: Asset) {
     error: query.error,
   };
 }
+
