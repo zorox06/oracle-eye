@@ -49,9 +49,16 @@ Deno.serve(async (req) => {
     const binanceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`;
 
     const cryptoCompareUrl = `https://min-api.cryptocompare.com/data/price?fsym=${asset}&tsyms=USD`;
-    // Header values must be valid ByteString; secrets can sometimes include newlines when pasted.
+    // Header values must be valid ByteString (edge runtime is strict). Secrets can include
+    // newlines or other invisible unicode chars depending on how they were copied.
     const cryptoCompareKeyRaw = Deno.env.get("CRYPTOCOMPARE_API_KEY") ?? "";
-    const cryptoCompareKey = cryptoCompareKeyRaw.replace(/[\r\n]+/g, "").trim() || null;
+    const cryptoCompareKeySanitized = cryptoCompareKeyRaw
+      .replace(/[\r\n]+/g, "")
+      // remove any non-ASCII/control chars to keep a valid ByteString
+      .replace(/[^\x20-\x7E]+/g, "")
+      .trim();
+    // CryptoCompare keys are typically simple tokens; keep a conservative character set.
+    const cryptoCompareKey = cryptoCompareKeySanitized.replace(/[^A-Za-z0-9._-]+/g, "") || null;
 
     const [cgRes, bnRes, ccRes] = await Promise.all([
       fetch(coingeckoUrl, { headers: { "Accept": "application/json" } }),
