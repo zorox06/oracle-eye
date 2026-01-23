@@ -43,32 +43,48 @@ export default function Markets() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <Link to="/" className="group min-w-0 transition-opacity hover:opacity-90" aria-label="AlgoOracle Home">
+            <div className="text-xs tracking-wide text-muted-foreground">AlgoOracle</div>
+            <div className="truncate text-base font-semibold tracking-tight">Oracle-driven prediction markets</div>
+            <div className="mt-0.5 h-px w-16 origin-left bg-primary/40 transition-transform duration-300 group-hover:scale-x-125" />
+          </Link>
+
+          <nav className="flex flex-wrap items-center justify-end gap-2">
+            <Button asChild variant="secondary" size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <Link to="/markets">Markets</Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <Link to="/oracle">Oracle</Link>
+            </Button>
+            <Button asChild disabled={!isAdmin.data} size="sm" className="transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <Link to="/markets/new">Create market</Link>
+            </Button>
+          </nav>
+        </div>
+      </header>
+
       <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header className="animate-fade-in flex flex-wrap items-end justify-between gap-6">
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Prediction Markets</p>
-            <h1 className="text-3xl font-semibold tracking-tight">Markets</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs tracking-wide text-muted-foreground">Prediction Markets</p>
+            <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Markets</h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
               Scalar markets resolve YES if the oracle price is ≥ strike at expiry.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button asChild variant="secondary">
-              <Link to="/">Back to Home</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link to="/oracle">Oracle dashboard</Link>
-            </Button>
-            <Button asChild disabled={!isAdmin.data}>
-              <Link to="/markets/new">Create Market</Link>
+            <Button asChild variant="secondary" size="sm">
+              <Link to="/">Home</Link>
             </Button>
           </div>
         </header>
 
         {!isAdmin.isLoading && !isAdmin.data ? (
-          <div className="mt-6 rounded-lg border border-border/60 bg-card/40 p-4 text-sm text-muted-foreground">
+          <div className="mt-6 rounded-lg border border-border/60 bg-card/30 p-4 text-sm text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-card/25">
             Creating markets is restricted to <span className="font-medium text-foreground">admins</span>. Sign in with an
             admin account to enable the button.
           </div>
@@ -78,7 +94,7 @@ export default function Markets() {
           {(markets.data ?? []).map((m) => (
             <Card
               key={m.id}
-              className="border-border/60 bg-card/50 p-5 backdrop-blur supports-[backdrop-filter]:bg-card/40"
+              className="hover-scale border-border/60 bg-card/40 p-5 backdrop-blur supports-[backdrop-filter]:bg-card/30"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="space-y-1">
@@ -110,11 +126,11 @@ export default function Markets() {
           ))}
 
           {markets.isLoading ? (
-            <Card className="border-border/60 bg-card/50 p-6 text-sm text-muted-foreground">Loading markets…</Card>
+            <Card className="border-border/60 bg-card/40 p-6 text-sm text-muted-foreground">Loading markets…</Card>
           ) : null}
 
           {!markets.isLoading && (markets.data?.length ?? 0) === 0 ? (
-            <Card className="border-border/60 bg-card/50 p-6 text-sm text-muted-foreground">
+            <Card className="border-border/60 bg-card/40 p-6 text-sm text-muted-foreground">
               No markets yet. Create the first one.
             </Card>
           ) : null}
