@@ -3,7 +3,9 @@ import { ConsensusEngine } from "@/components/oracle/ConsensusEngine";
 import { ReliabilityHeatmap } from "@/components/oracle/ReliabilityHeatmap";
 import { TruthHeader } from "@/components/oracle/TruthHeader";
 import { useOracleAsset } from "@/components/oracle/useOracleAsset";
+import { ProviderStatusPanel } from "@/components/oracle/ProviderStatusPanel";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/providers/AuthProvider";
 import { Link } from "react-router-dom";
@@ -16,6 +18,17 @@ const Index = () => {
   const eth = useOracleAsset("ETH");
 
   const [asset, setAsset] = useState<"BTC" | "ETH">("BTC");
+
+  const getErrorMessage = (err: unknown) => {
+    if (!err) return "Failed to load oracle data.";
+    if (err instanceof Error) return err.message;
+    if (typeof err === "string") return err;
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return "Failed to load oracle data.";
+    }
+  };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -81,22 +94,28 @@ const Index = () => {
 
               <div className="lg:col-span-5">
                 <TabsContent value="BTC" className="mt-0 animate-fade-in">
-                  <TruthHeader
-                    aggregatedPrice={btc.state.aggregatedPrice}
-                    onChainPrice={btc.state.onChainPrice}
-                    isSynced={btc.state.isSynced}
-                    updatedAt={btc.state.updatedAt}
-                    onForceUpdate={btc.forceUpdate}
-                  />
+                  <div className="grid gap-3">
+                    <TruthHeader
+                      aggregatedPrice={btc.state.aggregatedPrice}
+                      onChainPrice={btc.state.onChainPrice}
+                      isSynced={btc.state.isSynced}
+                      updatedAt={btc.state.updatedAt}
+                      onForceUpdate={btc.forceUpdate}
+                    />
+                    <ProviderStatusPanel nodes={btc.state.nodes} isLoading={btc.isLoading} isError={btc.isError} />
+                  </div>
                 </TabsContent>
                 <TabsContent value="ETH" className="mt-0 animate-fade-in">
-                  <TruthHeader
-                    aggregatedPrice={eth.state.aggregatedPrice}
-                    onChainPrice={eth.state.onChainPrice}
-                    isSynced={eth.state.isSynced}
-                    updatedAt={eth.state.updatedAt}
-                    onForceUpdate={eth.forceUpdate}
-                  />
+                  <div className="grid gap-3">
+                    <TruthHeader
+                      aggregatedPrice={eth.state.aggregatedPrice}
+                      onChainPrice={eth.state.onChainPrice}
+                      isSynced={eth.state.isSynced}
+                      updatedAt={eth.state.updatedAt}
+                      onForceUpdate={eth.forceUpdate}
+                    />
+                    <ProviderStatusPanel nodes={eth.state.nodes} isLoading={eth.isLoading} isError={eth.isError} />
+                  </div>
                 </TabsContent>
               </div>
             </div>
@@ -106,6 +125,22 @@ const Index = () => {
 
         <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
           <TabsContent value="BTC" className="animate-fade-in">
+            {btc.isError && (
+              <div className="mb-6">
+                <Alert variant="destructive" className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <AlertTitle>Oracle temporarily unavailable</AlertTitle>
+                    <AlertDescription>
+                      <p>{getErrorMessage(btc.error)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Your last known values are still shown below.</p>
+                    </AlertDescription>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={btc.forceUpdate} className="sm:shrink-0">
+                    Retry
+                  </Button>
+                </Alert>
+              </div>
+            )}
             <section className="grid gap-6 lg:grid-cols-12 lg:gap-8">
               <div className="lg:col-span-8">
                 <ConsensusEngine nodes={btc.state.nodes} aggregatedPrice={btc.state.aggregatedPrice} algorithmLabel="Median" />
@@ -122,6 +157,22 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="ETH" className="animate-fade-in">
+            {eth.isError && (
+              <div className="mb-6">
+                <Alert variant="destructive" className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <AlertTitle>Oracle temporarily unavailable</AlertTitle>
+                    <AlertDescription>
+                      <p>{getErrorMessage(eth.error)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Your last known values are still shown below.</p>
+                    </AlertDescription>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={eth.forceUpdate} className="sm:shrink-0">
+                    Retry
+                  </Button>
+                </Alert>
+              </div>
+            )}
             <section className="grid gap-6 lg:grid-cols-12 lg:gap-8">
               <div className="lg:col-span-8">
                 <ConsensusEngine nodes={eth.state.nodes} aggregatedPrice={eth.state.aggregatedPrice} algorithmLabel="Median" />
