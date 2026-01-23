@@ -42,7 +42,7 @@ export function TruthHeader({
   }, [sinceSec]);
 
   return (
-    <div className="grid w-full items-stretch gap-3 sm:w-auto sm:min-w-[540px] sm:grid-cols-3">
+    <div className="grid w-full items-stretch gap-3 sm:w-auto sm:grid-cols-3">
       <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40">
         <p className="text-xs font-medium tracking-wide text-muted-foreground">Real-Time Market Price (Aggregated)</p>
         <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{formatUsd(aggregatedPrice)}</p>
