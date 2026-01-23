@@ -49,7 +49,9 @@ Deno.serve(async (req) => {
     const binanceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`;
 
     const cryptoCompareUrl = `https://min-api.cryptocompare.com/data/price?fsym=${asset}&tsyms=USD`;
-    const cryptoCompareKey = Deno.env.get("CRYPTOCOMPARE_API_KEY");
+    // Header values must be valid ByteString; secrets can sometimes include newlines when pasted.
+    const cryptoCompareKeyRaw = Deno.env.get("CRYPTOCOMPARE_API_KEY") ?? "";
+    const cryptoCompareKey = cryptoCompareKeyRaw.replace(/[\r\n]+/g, "").trim() || null;
 
     const [cgRes, bnRes, ccRes] = await Promise.all([
       fetch(coingeckoUrl, { headers: { "Accept": "application/json" } }),
@@ -57,7 +59,7 @@ Deno.serve(async (req) => {
       fetch(cryptoCompareUrl, {
         headers: {
           "Accept": "application/json",
-          ...(cryptoCompareKey ? { authorization: `Apikey ${cryptoCompareKey}` } : {}),
+          ...(cryptoCompareKey ? { Authorization: `Apikey ${cryptoCompareKey}` } : {}),
         },
       }),
     ]);
