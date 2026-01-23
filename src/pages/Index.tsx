@@ -17,7 +17,13 @@ const Index = () => {
   const { user, signOut } = useAuth();
 
   const [mode, setMode] = useLocalStorageState<OracleDataMode>("algooracle:dataMode", "backend");
-  const [cryptoCompareKey, setCryptoCompareKey] = useLocalStorageState<string>("algooracle:cryptoCompareKey", "");
+
+  // NOTE: Any VITE_* key is public (bundled into the client). Prefer backend secrets.
+  const envCryptoCompareKey = (import.meta as any)?.env?.VITE_CRYPTOCOMPARE_API_KEY as string | undefined;
+  const [cryptoCompareKey, setCryptoCompareKey] = useLocalStorageState<string>(
+    "algooracle:cryptoCompareKey",
+    envCryptoCompareKey ?? ""
+  );
 
   const btc = useOracleAsset("BTC", { mode, cryptoCompareKey });
   const eth = useOracleAsset("ETH", { mode, cryptoCompareKey });
