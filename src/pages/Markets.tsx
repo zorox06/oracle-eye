@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useToast } from "@/hooks/use-toast";
 
 type MarketRow = {
   id: string;
@@ -28,6 +29,29 @@ function formatUsd(amount: number) {
 
 export default function Markets() {
   const isAdmin = useIsAdmin();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const resolveMarket = useMutation({
+    mutationFn: async (marketId: string) => {
+      const { data, error } = await supabase.functions.invoke("market-resolve", {
+        body: { marketId },
+      });
+      if (error) throw error;
+      return data as unknown;
+    },
+    onSuccess: () => {
+      toast({ title: "Market resolved", description: "Resolution saved from oracle consensus." });
+      void queryClient.invalidateQueries({ queryKey: ["markets"] });
+    },
+    onError: (e: any) => {
+      toast({
+        title: "Resolve failed",
+        description: typeof e?.message === "string" ? e.message : "Could not resolve market.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const markets = useQuery({
     queryKey: ["markets", "list"],
@@ -105,9 +129,21 @@ export default function Markets() {
                   {m.description ? <p className="text-sm text-muted-foreground">{m.description}</p> : null}
                 </div>
 
-                <div className="text-right text-sm">
-                  <div className="text-muted-foreground">Strike</div>
-                  <div className="font-mono">{formatUsd(Number(m.strike_price))}</div>
+                <div className="flex flex-col items-end gap-2 text-right text-sm">
+                  <div>
+                    <div className="text-muted-foreground">Strike</div>
+                    <div className="font-mono">{formatUsd(Number(m.strike_price))}</div>
+                  </div>
+
+                  {isAdmin.data && m.status !== "resolved" && new Date(m.expiry_at).getTime() <= Date.now() ? (
+                    <Button
+                      size="sm"
+                      disabled={resolveMarket.isPending}
+                      onClick={() => resolveMarket.mutate(m.id)}
+                    >
+                      Resolve
+                    </Button>
+                  ) : null}
                 </div>
               </div>
 
