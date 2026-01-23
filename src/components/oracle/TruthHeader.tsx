@@ -60,7 +60,7 @@ export function TruthHeader({
           </Badge>
         </div>
         <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{formatUsd(onChainPrice)}</p>
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50" />
@@ -69,9 +69,15 @@ export function TruthHeader({
             <span>{updateLabel}</span>
           </div>
 
-          <Button onClick={onForceUpdate} className="gap-2" size="sm">
+          <Button
+            onClick={onForceUpdate}
+            variant="secondary"
+            size="icon"
+            className="shrink-0 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            aria-label="Refresh oracle"
+            title="Refresh"
+          >
             <RefreshCcw className="h-4 w-4" />
-            Force Oracle Update
           </Button>
         </div>
       </Card>
