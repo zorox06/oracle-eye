@@ -1,1 +1,4 @@
 project_id = "yoyjpnmzldldlrkgziyc"
+
+[functions.oracle-price]
+verify_jwt = false
