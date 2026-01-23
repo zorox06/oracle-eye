@@ -55,8 +55,17 @@ export function TruthHeader({
       <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-medium tracking-wide text-muted-foreground">On-Chain Smart Contract Price</p>
-          <Badge variant={isSynced ? "secondary" : "destructive"} className="gap-1">
-            {isSynced ? "Synced" : "Out of sync"}
+          <Badge
+            variant={isSynced ? "secondary" : "destructive"}
+            className="px-2"
+            title={isSynced ? "Synced" : "Out of sync"}
+            aria-label={isSynced ? "Synced" : "Out of sync"}
+          >
+            <span
+              className="h-2 w-2 rounded-full"
+              aria-hidden
+              style={{ background: isSynced ? "hsl(var(--accent))" : "hsl(var(--destructive))" }}
+            />
           </Badge>
         </div>
         <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{formatUsd(onChainPrice)}</p>
