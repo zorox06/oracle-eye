@@ -58,8 +58,8 @@ const Index = () => {
                   Two-asset oracle view built for plugging in live price APIs (median consensus + reliability + audit).
                 </p>
 
-                <div className="mt-5 flex flex-wrap items-center gap-3">
-                  <TabsList className="grid w-[240px] grid-cols-2">
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                  <TabsList className="grid w-full max-w-[320px] grid-cols-2 sm:w-[240px]">
                     <TabsTrigger value="BTC">BTC</TabsTrigger>
                     <TabsTrigger value="ETH">ETH</TabsTrigger>
                   </TabsList>
