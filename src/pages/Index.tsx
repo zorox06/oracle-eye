@@ -2,14 +2,20 @@ import { AuditTrail } from "@/components/oracle/AuditTrail";
 import { ConsensusEngine } from "@/components/oracle/ConsensusEngine";
 import { ReliabilityHeatmap } from "@/components/oracle/ReliabilityHeatmap";
 import { TruthHeader } from "@/components/oracle/TruthHeader";
-import { useOracleSimulation } from "@/components/oracle/useOracleSimulation";
+import { useOracleAsset } from "@/components/oracle/useOracleAsset";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/providers/AuthProvider";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Index = () => {
-  const oracle = useOracleSimulation();
   const { user, signOut } = useAuth();
+
+  const btc = useOracleAsset("BTC");
+  const eth = useOracleAsset("ETH");
+
+  const [asset, setAsset] = useState<"BTC" | "ETH">("BTC");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -41,53 +47,78 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="border-b border-border/60">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-          <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-7">
-              <p className="text-xs tracking-wide text-muted-foreground">Oracle</p>
-              <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-                Consensus dashboard
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Monitor node submissions, reliability, and the aggregated oracle price in real time.
-              </p>
-            </div>
-            <div className="lg:col-span-5">
-              <TruthHeader
-                aggregatedPrice={oracle.state.aggregatedPrice}
-                onChainPrice={oracle.state.onChainPrice}
-                isSynced={oracle.state.isSynced}
-                updatedAt={oracle.state.updatedAt}
-                onForceUpdate={oracle.forceUpdate}
-              />
+      <Tabs value={asset} onValueChange={(v) => setAsset(v as "BTC" | "ETH")} className="w-full">
+        <div className="border-b border-border/60">
+          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+              <div className="lg:col-span-7">
+                <p className="text-xs tracking-wide text-muted-foreground">Oracle</p>
+                <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">BTC / ETH consensus</h1>
+                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                  Two-asset oracle view built for plugging in live price APIs (median consensus + reliability + audit).
+                </p>
+
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <TabsList className="grid w-[240px] grid-cols-2">
+                    <TabsTrigger value="BTC">BTC</TabsTrigger>
+                    <TabsTrigger value="ETH">ETH</TabsTrigger>
+                  </TabsList>
+                  <div className="text-xs text-muted-foreground">Polling live sources every ~5s.</div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <TabsContent value="BTC" className="mt-0">
+                  <TruthHeader
+                    aggregatedPrice={btc.state.aggregatedPrice}
+                    onChainPrice={btc.state.onChainPrice}
+                    isSynced={btc.state.isSynced}
+                    updatedAt={btc.state.updatedAt}
+                    onForceUpdate={btc.forceUpdate}
+                  />
+                </TabsContent>
+                <TabsContent value="ETH" className="mt-0">
+                  <TruthHeader
+                    aggregatedPrice={eth.state.aggregatedPrice}
+                    onChainPrice={eth.state.onChainPrice}
+                    isSynced={eth.state.isSynced}
+                    updatedAt={eth.state.updatedAt}
+                    onForceUpdate={eth.forceUpdate}
+                  />
+                </TabsContent>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-        <section className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-12">
-            <ConsensusEngine
-              nodes={oracle.state.nodes}
-              aggregatedPrice={oracle.state.aggregatedPrice}
-              algorithmLabel="Median Calculation"
-            />
-          </div>
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+          <TabsContent value="BTC">
+            <section className="grid gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-8">
+                <ConsensusEngine nodes={btc.state.nodes} aggregatedPrice={btc.state.aggregatedPrice} algorithmLabel="Median" />
+                <div className="mt-6">
+                  <ReliabilityHeatmap cycles={btc.state.cycles} maxCycles={10} nodes={btc.state.nodes.map((n) => n.id)} />
+                </div>
+              </div>
+              <div className="lg:col-span-4">
+                <AuditTrail entries={btc.state.audit} />
+              </div>
+            </section>
+          </TabsContent>
 
-          <div className="lg:col-span-7">
-            <ReliabilityHeatmap
-              cycles={oracle.state.cycles}
-              maxCycles={10}
-              nodes={oracle.state.nodes.map((n) => n.id)}
-            />
-          </div>
-
-          <div className="lg:col-span-5">
-            <AuditTrail entries={oracle.state.audit} />
-          </div>
-        </section>
+          <TabsContent value="ETH">
+            <section className="grid gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-8">
+                <ConsensusEngine nodes={eth.state.nodes} aggregatedPrice={eth.state.aggregatedPrice} algorithmLabel="Median" />
+                <div className="mt-6">
+                  <ReliabilityHeatmap cycles={eth.state.cycles} maxCycles={10} nodes={eth.state.nodes.map((n) => n.id)} />
+                </div>
+              </div>
+              <div className="lg:col-span-4">
+                <AuditTrail entries={eth.state.audit} />
+              </div>
+            </section>
+          </TabsContent>
 
         <div className="mt-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <span>Back to</span>
@@ -100,7 +131,8 @@ const Index = () => {
           </Link>
           <span>.</span>
         </div>
-      </main>
+        </main>
+      </Tabs>
     </div>
   );
 };
