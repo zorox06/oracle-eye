@@ -20,7 +20,7 @@ function formatUsdCompact(amount: number) {
 
 export function AuditTrail({ entries }: { entries: AuditEntry[] }) {
   return (
-    <Card className="h-full border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+    <Card className="h-full border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Audit Trail</p>
@@ -43,7 +43,7 @@ export function AuditTrail({ entries }: { entries: AuditEntry[] }) {
         {entries.map((e, idx) => (
           <div
             key={`${e.txHash}-${idx}`}
-            className="rounded-lg border border-border/60 bg-card/30 p-3"
+            className="rounded-lg border border-border/60 bg-card/30 p-3 transition-[transform,box-shadow] duration-200 motion-reduce:transition-none motion-reduce:transform-none hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

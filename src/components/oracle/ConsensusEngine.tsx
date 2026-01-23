@@ -14,7 +14,7 @@ function formatUsdCompact(amount: number) {
 function NodeCard({ node }: { node: OracleNode }) {
   const online = node.status === "online";
   return (
-    <div className="rounded-lg border border-border/60 bg-card/40 p-4 backdrop-blur">
+    <div className="rounded-lg border border-border/60 bg-card/40 p-4 backdrop-blur transition-[transform,box-shadow] duration-200 motion-reduce:transition-none motion-reduce:transform-none hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium tracking-tight">{node.source}</p>
@@ -43,7 +43,7 @@ export function ConsensusEngine({
   algorithmLabel: string;
 }) {
   return (
-    <Card className="relative overflow-hidden border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+    <Card className="relative overflow-hidden border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Consensus Engine</p>

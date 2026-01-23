@@ -43,7 +43,7 @@ export function TruthHeader({
 
   return (
     <div className="grid w-full items-stretch gap-3 sm:w-auto sm:grid-cols-3">
-      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
         <p className="text-xs font-medium tracking-wide text-muted-foreground">Real-Time Market Price (Aggregated)</p>
         <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{formatUsd(aggregatedPrice)}</p>
         <div
@@ -52,7 +52,7 @@ export function TruthHeader({
         />
       </Card>
 
-      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-medium tracking-wide text-muted-foreground">On-Chain Smart Contract Price</p>
           <Badge variant={isSynced ? "secondary" : "destructive"} className="gap-1">
@@ -82,7 +82,7 @@ export function TruthHeader({
         </div>
       </Card>
 
-      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+      <Card className="relative overflow-hidden border-border/60 bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
         <p className="text-xs font-medium tracking-wide text-muted-foreground">Last Update</p>
         <p className="mt-2 text-lg font-medium">{updatedAt.toLocaleTimeString()}</p>
         <p className="mt-1 text-xs text-muted-foreground">{updateLabel}</p>
