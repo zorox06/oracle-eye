@@ -49,11 +49,23 @@ const Index = () => {
 
       <Tabs value={asset} onValueChange={(v) => setAsset(v as "BTC" | "ETH")} className="w-full">
         <div className="border-b border-border/60">
-          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-            <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
+          <div className="relative">
+            <div
+              className="pointer-events-none absolute inset-0"
+              aria-hidden
+              style={{
+                background:
+                  "radial-gradient(900px 420px at 20% 20%, hsl(var(--primary) / 0.12), transparent 55%), radial-gradient(720px 360px at 85% 15%, hsl(var(--accent) / 0.10), transparent 60%)",
+              }}
+            />
+
+            <div className="relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:py-12">
+              <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
               <div className="lg:col-span-7">
                 <p className="text-xs tracking-wide text-muted-foreground">Oracle</p>
-                <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">BTC / ETH consensus</h1>
+                <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+                  BTC / ETH consensus
+                </h1>
                 <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                   Two-asset oracle view built for plugging in live price APIs (median consensus + reliability + audit).
                 </p>
@@ -68,7 +80,7 @@ const Index = () => {
               </div>
 
               <div className="lg:col-span-5">
-                <TabsContent value="BTC" className="mt-0">
+                <TabsContent value="BTC" className="mt-0 animate-fade-in">
                   <TruthHeader
                     aggregatedPrice={btc.state.aggregatedPrice}
                     onChainPrice={btc.state.onChainPrice}
@@ -77,7 +89,7 @@ const Index = () => {
                     onForceUpdate={btc.forceUpdate}
                   />
                 </TabsContent>
-                <TabsContent value="ETH" className="mt-0">
+                <TabsContent value="ETH" className="mt-0 animate-fade-in">
                   <TruthHeader
                     aggregatedPrice={eth.state.aggregatedPrice}
                     onChainPrice={eth.state.onChainPrice}
@@ -90,10 +102,11 @@ const Index = () => {
             </div>
           </div>
         </div>
+        </div>
 
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-          <TabsContent value="BTC">
-            <section className="grid gap-6 lg:grid-cols-12">
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
+          <TabsContent value="BTC" className="animate-fade-in">
+            <section className="grid gap-6 lg:grid-cols-12 lg:gap-8">
               <div className="lg:col-span-8">
                 <ConsensusEngine nodes={btc.state.nodes} aggregatedPrice={btc.state.aggregatedPrice} algorithmLabel="Median" />
                 <div className="mt-6">
@@ -101,13 +114,15 @@ const Index = () => {
                 </div>
               </div>
               <div className="lg:col-span-4">
-                <AuditTrail entries={btc.state.audit} />
+                <div className="lg:sticky lg:top-24">
+                  <AuditTrail entries={btc.state.audit} />
+                </div>
               </div>
             </section>
           </TabsContent>
 
-          <TabsContent value="ETH">
-            <section className="grid gap-6 lg:grid-cols-12">
+          <TabsContent value="ETH" className="animate-fade-in">
+            <section className="grid gap-6 lg:grid-cols-12 lg:gap-8">
               <div className="lg:col-span-8">
                 <ConsensusEngine nodes={eth.state.nodes} aggregatedPrice={eth.state.aggregatedPrice} algorithmLabel="Median" />
                 <div className="mt-6">
@@ -115,22 +130,24 @@ const Index = () => {
                 </div>
               </div>
               <div className="lg:col-span-4">
-                <AuditTrail entries={eth.state.audit} />
+                <div className="lg:sticky lg:top-24">
+                  <AuditTrail entries={eth.state.audit} />
+                </div>
               </div>
             </section>
           </TabsContent>
 
-        <div className="mt-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>Back to</span>
-          <Link to="/" className="story-link">
-            Home
-          </Link>
-          <span>or</span>
-          <Link to="/markets" className="story-link">
-            Markets
-          </Link>
-          <span>.</span>
-        </div>
+          <div className="mt-10 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span>Back to</span>
+            <Link to="/" className="story-link">
+              Home
+            </Link>
+            <span>or</span>
+            <Link to="/markets" className="story-link">
+              Markets
+            </Link>
+            <span>.</span>
+          </div>
         </main>
       </Tabs>
     </div>

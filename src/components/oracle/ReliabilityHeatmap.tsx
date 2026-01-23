@@ -52,7 +52,7 @@ export function ReliabilityHeatmap({
     .filter((p) => p.y >= 0);
 
   return (
-    <Card className="h-full border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40">
+    <Card className="h-full border-border/60 bg-card/50 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/40 animate-fade-in">
       <div>
         <p className="text-sm font-medium text-muted-foreground">Reliability</p>
         <h2 className="mt-1 text-xl font-semibold tracking-tight">Node Integrity Heatmap</h2>
