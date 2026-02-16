@@ -1,176 +1,133 @@
-import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useIsAdmin } from "@/hooks/use-is-admin";
-import { useToast } from "@/hooks/use-toast";
-
-type MarketRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  asset_symbol: string;
-  strike_price: number;
-  expiry_at: string;
-  status: "open" | "closed" | "resolved";
-  created_at: string;
-};
-
-function formatUsd(amount: number) {
-  return amount.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  });
-}
+import { Plus, TrendingUp, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Markets() {
-  const isAdmin = useIsAdmin();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const resolveMarket = useMutation({
-    mutationFn: async (marketId: string) => {
-      const { data, error } = await supabase.functions.invoke("market-resolve", {
-        body: { marketId },
-      });
-      if (error) throw error;
-      return data as unknown;
-    },
-    onSuccess: () => {
-      toast({ title: "Market resolved", description: "Resolution saved from oracle consensus." });
-      void queryClient.invalidateQueries({ queryKey: ["markets"] });
-    },
-    onError: (e: any) => {
-      toast({
-        title: "Resolve failed",
-        description: typeof e?.message === "string" ? e.message : "Could not resolve market.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const markets = useQuery({
-    queryKey: ["markets", "list"],
+  const { data: markets, isLoading } = useQuery({
+    queryKey: ["markets"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("markets")
-        .select("id,title,description,asset_symbol,strike_price,expiry_at,status,created_at")
-        .order("created_at", { ascending: false })
-        .limit(25);
+        .select("*")
+        .order("created_at", { ascending: false });
+
       if (error) throw error;
-      return (data ?? []) as MarketRow[];
+      return data;
     },
   });
 
+  if (isLoading) {
+    return (
+      <div className="page-container">
+        <main className="content-container py-20">
+          <div className="text-center">
+            <div className="animate-pulse text-muted-foreground">Loading markets...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="group min-w-0 transition-opacity hover:opacity-90" aria-label="AlgoOracle Home">
-            <div className="text-xs tracking-wide text-muted-foreground">AlgoOracle</div>
-            <div className="truncate text-base font-semibold tracking-tight">Oracle-driven prediction markets</div>
-            <div className="mt-0.5 h-px w-16 origin-left bg-primary/40 transition-transform duration-300 group-hover:scale-x-125" />
-          </Link>
-
-          <nav className="flex flex-wrap items-center justify-end gap-2">
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/markets">Markets</Link>
+    <div className="page-container">
+      {/* Header */}
+      <div className="page-header">
+        <div className="content-container py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Markets</h1>
+              <p className="text-muted-foreground mt-2">
+                Browse and trade on prediction markets
+              </p>
+            </div>
+            <Button onClick={() => navigate("/admin")} className="btn-primary gap-2">
+              <Plus className="h-4 w-4" />
+              Create Market
             </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/oracle">Oracle</Link>
-            </Button>
-            <Button asChild disabled={!isAdmin.data} size="sm">
-              <Link to="/markets/new">Create market</Link>
-            </Button>
-          </nav>
+          </div>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="animate-fade-in flex flex-wrap items-end justify-between gap-6">
-          <div className="space-y-2">
-            <p className="text-xs tracking-wide text-muted-foreground">Prediction Markets</p>
-            <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Markets</h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Scalar markets resolve YES if the oracle price is ≥ strike at expiry.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" size="sm">
-              <Link to="/">Home</Link>
-            </Button>
-          </div>
-        </header>
-
-        {!isAdmin.isLoading && !isAdmin.data ? (
-          <div className="mt-6 rounded-lg border border-border/60 bg-card/30 p-4 text-sm text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-card/25">
-            Creating markets is restricted to <span className="font-medium text-foreground">admins</span>. Sign in with an
-            admin account to enable the button.
-          </div>
-        ) : null}
-
-        <section className="mt-8 grid gap-4">
-          {(markets.data ?? []).map((m) => (
-            <Card
-              key={m.id}
-              className="hover-scale border-border/60 bg-card/40 p-5 backdrop-blur supports-[backdrop-filter]:bg-card/30"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold tracking-tight">{m.title}</h2>
-                    <Badge variant="secondary">{m.status.toUpperCase()}</Badge>
-                  </div>
-                  {m.description ? <p className="text-sm text-muted-foreground">{m.description}</p> : null}
-                </div>
-
-                <div className="flex flex-col items-end gap-2 text-right text-sm">
-                  <div>
-                    <div className="text-muted-foreground">Strike</div>
-                    <div className="font-mono">{formatUsd(Number(m.strike_price))}</div>
-                  </div>
-
-                  {isAdmin.data && m.status !== "resolved" && new Date(m.expiry_at).getTime() <= Date.now() ? (
-                    <Button
-                      size="sm"
-                      disabled={resolveMarket.isPending}
-                      onClick={() => resolveMarket.mutate(m.id)}
+      <main className="content-container py-8">
+        {!markets || markets.length === 0 ? (
+          <Card className="unified-card p-12 text-center">
+            <div className="space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">No Markets Yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Create your first prediction market to get started!
+                </p>
+                <Button onClick={() => navigate("/admin")} className="btn-primary">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Market
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {markets.map((market) => (
+              <Card
+                key={market.id}
+                className="unified-card p-6 cursor-pointer hover:border-primary/50 transition-all"
+                onClick={() => navigate(`/trade/${market.id}`)}
+              >
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold line-clamp-2">{market.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {market.description}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={market.status === "open" ? "default" : "secondary"}
+                      className="shrink-0"
                     >
-                      Resolve
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
+                      {market.status}
+                    </Badge>
+                  </div>
 
-              <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
-                <div>
-                  <span className="text-foreground">Asset:</span> {m.asset_symbol}
-                </div>
-                <div>
-                  <span className="text-foreground">Expiry:</span> {new Date(m.expiry_at).toLocaleString()}
-                </div>
-                <div className="sm:text-right">
-                  <span className="text-foreground">Market ID:</span> <span className="font-mono">{m.id.slice(0, 8)}…</span>
-                </div>
-              </div>
-            </Card>
-          ))}
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Asset</p>
+                      <p className="font-medium">{market.asset_symbol}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Strike</p>
+                      <p className="font-medium font-mono">${market.strike_price}</p>
+                    </div>
+                  </div>
 
-          {markets.isLoading ? (
-            <Card className="border-border/60 bg-card/40 p-6 text-sm text-muted-foreground">Loading markets…</Card>
-          ) : null}
+                  {/* Expiry */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-3 border-t border-border/40">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Expires {formatDistanceToNow(new Date(market.expiry_at), { addSuffix: true })}
+                    </span>
+                  </div>
 
-          {!markets.isLoading && (markets.data?.length ?? 0) === 0 ? (
-            <Card className="border-border/60 bg-card/40 p-6 text-sm text-muted-foreground">
-              No markets yet. Create the first one.
-            </Card>
-          ) : null}
-        </section>
+                  {/* CTA */}
+                  <Button className="w-full btn-primary" size="sm">
+                    Trade Now
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

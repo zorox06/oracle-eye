@@ -1,4 +1,4 @@
-// Lovable Cloud backend function: resolve an expired market using oracle consensus
+// Supabase Edge Function: resolve an expired market using oracle consensus
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 

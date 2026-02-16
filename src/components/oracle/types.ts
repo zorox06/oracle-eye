@@ -1,14 +1,18 @@
 export type OracleNodeId = "A" | "B" | "C";
 
+export type NodeStatus = "online" | "offline" | "stale" | "outlier";
+
 export type OracleNode = {
   id: OracleNodeId;
   name: string;
   source: string;
   price: number;
-  status: "online" | "offline";
+  status: NodeStatus;
+  timestamp?: string;
+  deviation?: number | null;
 };
 
-export type HeatCellStatus = "good" | "warn" | "bad";
+export type HeatCellStatus = "good" | "warn" | "bad" | "offline";
 
 export type HeatmapCell = {
   nodeId: OracleNodeId;
@@ -25,6 +29,28 @@ export type AuditEntry = {
   gasFee: string;
 };
 
+export type ConfidenceLevel = "high" | "medium" | "low" | "critical" | "none";
+
+export type OracleConfidence = {
+  score: number;
+  level: ConfidenceLevel;
+};
+
+export type OracleConsensus = {
+  reached: boolean;
+  onlineNodes: number;
+  totalNodes: number;
+  threshold: number;
+};
+
+export type OracleMetadata = {
+  confidence: OracleConfidence;
+  consensus: OracleConsensus;
+  latency: number;
+  staleThresholdMs: number;
+  deviationThreshold: number;
+};
+
 export type OracleState = {
   nodes: OracleNode[];
   aggregatedPrice: number;
@@ -33,4 +59,5 @@ export type OracleState = {
   updatedAt: Date;
   cycles: HeatmapCell[];
   audit: AuditEntry[];
+  oracle?: OracleMetadata;
 };

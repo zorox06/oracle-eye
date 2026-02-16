@@ -1,0 +1,15 @@
+[
+  {
+    "id": "c092e901-0809-4eee-bc28-e93b57d81110",
+    "title": "Will BTC hit 90k USD today ",
+    "description": "",
+    "asset_symbol": "BTC",
+    "strike_price": 900000,
+    "expiry_at": "2026-01-24T18:30:00+00:00",
+    "status": "open",
+    "created_at": "2026-01-23T23:28:46.276051+00:00",
+    "resolved_at": null,
+    "resolved_price": null,
+    "app_id": null
+  }
+]

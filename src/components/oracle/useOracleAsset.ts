@@ -2,19 +2,35 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
-import type { AuditEntry, HeatmapCell, OracleNode, OracleNodeId, OracleState } from "./types";
+import type {
+  AuditEntry,
+  HeatmapCell,
+  NodeStatus,
+  OracleMetadata,
+  OracleNode,
+  OracleNodeId,
+  OracleState,
+} from "./types";
 
 type Asset = "BTC" | "ETH";
 
 type OraclePriceResponse = {
   asset: Asset;
   updatedAt: string;
-  nodes: Array<OracleNode>;
+  nodes: Array<{
+    id: OracleNodeId;
+    name: string;
+    source: string;
+    status: NodeStatus;
+    price: number;
+    timestamp?: string;
+    deviation?: number | null;
+  }>;
   aggregatedPrice: number;
   onChainPrice: number;
   isSynced: boolean;
+  oracle?: OracleMetadata;
 };
-
 
 function shortHash() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -22,7 +38,9 @@ function shortHash() {
   return `${rand()}${rand()}${rand()}...${rand()}${rand()}${rand()}`;
 }
 
-function cellStatus(deviationPct: number): HeatmapCell["status"] {
+function cellStatus(status: NodeStatus, deviationPct: number): HeatmapCell["status"] {
+  if (status === "offline" || status === "stale") return "offline";
+  if (status === "outlier") return "bad";
   if (deviationPct <= 0.1) return "good";
   if (deviationPct > 0.5) return "bad";
   return "warn";
@@ -33,20 +51,29 @@ function buildHeatmapSeed(nodes: OracleNode[], medianPrice: number, maxCycles = 
   for (let cycle = maxCycles; cycle >= 1; cycle -= 1) {
     for (const n of nodes) {
       if (n.status !== "online" || medianPrice <= 0) {
-        cells.push({ nodeId: n.id, cycle, deviationPct: 0, status: "warn" });
+        cells.push({ nodeId: n.id, cycle, deviationPct: 0, status: "offline" });
         continue;
       }
       const deviationPct = Math.abs((n.price - medianPrice) / medianPrice) * 100;
-      cells.push({ nodeId: n.id, cycle, deviationPct, status: cellStatus(deviationPct) });
+      cells.push({ nodeId: n.id, cycle, deviationPct, status: cellStatus(n.status, deviationPct) });
     }
   }
   return cells;
 }
 
-function normalizeNodes(nodes: OracleNode[]): OracleNode[] {
-  // Ensure stable order and presence for A/B/C (the UI assumes fixed node IDs)
+function normalizeNodes(nodes: OraclePriceResponse["nodes"]): OracleNode[] {
   const byId = new Map<OracleNodeId, OracleNode>();
-  for (const n of nodes) byId.set(n.id, n);
+  for (const n of nodes) {
+    byId.set(n.id, {
+      id: n.id,
+      name: n.name,
+      source: n.source,
+      status: n.status,
+      price: n.price,
+      timestamp: n.timestamp,
+      deviation: n.deviation,
+    });
+  }
   const fallback = (id: OracleNodeId, source: string): OracleNode => ({
     id,
     name: `Node ${id}`,
@@ -104,6 +131,7 @@ export function useOracleAsset(asset: Asset) {
       updatedAt: now,
       cycles: buildHeatmapSeed(initialNodes, 0, maxCycles),
       audit: auditSeed,
+      oracle: undefined,
     };
   });
 
@@ -120,12 +148,15 @@ export function useOracleAsset(asset: Asset) {
         .filter((c) => c.cycle <= maxCycles);
 
       const newCells: HeatmapCell[] = nextNodes.map((n) => {
-        const deviationPct = nextAgg > 0 && n.status === "online" ? Math.abs((n.price - nextAgg) / nextAgg) * 100 : 0;
+        const deviationPct =
+          nextAgg > 0 && n.status === "online"
+            ? Math.abs((n.price - nextAgg) / nextAgg) * 100
+            : 0;
         return {
           nodeId: n.id,
           cycle: 1,
           deviationPct,
-          status: cellStatus(deviationPct),
+          status: cellStatus(n.status, deviationPct),
         };
       });
 
@@ -148,6 +179,7 @@ export function useOracleAsset(asset: Asset) {
         updatedAt: now,
         cycles: [...newCells, ...shifted],
         audit: nextAudit,
+        oracle: query.data.oracle,
       };
     });
   }, [asset, maxCycles, query.data]);
@@ -164,4 +196,3 @@ export function useOracleAsset(asset: Asset) {
     error: query.error,
   };
 }
-

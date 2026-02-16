@@ -1,11 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
+
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useWallet } from "@/providers/WalletProvider";
+import { deployContract } from "@/lib/algorand";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +24,7 @@ const schema = z.object({
   asset_symbol: z.string().trim().min(2).max(10).default("BTC"),
   strike_price: z.coerce.number().positive().max(1_000_000_000),
   expiry_at: z.string().min(1), // datetime-local string
+  app_id: z.coerce.number().optional(),
 });
 
 type Values = z.infer<typeof schema>;
@@ -29,6 +34,8 @@ export default function MarketCreate() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();
+  const { isConnected, address, peraWallet } = useWallet();
+  const [isDeploying, setIsDeploying] = useState(false);
 
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -48,6 +55,36 @@ export default function MarketCreate() {
       return;
     }
 
+    if (!isConnected || !address || !peraWallet) {
+      toast({ title: "Wallet required", description: "Please connect your wallet to deploy the contract.", variant: "destructive" });
+      return;
+    }
+
+    setIsDeploying(true);
+    let appId = null;
+
+    try {
+      const expiryTimestamp = Math.floor(new Date(values.expiry_at).getTime() / 1000);
+
+      toast({ title: "Deploying Contract", description: "Please sign the transaction in your wallet..." });
+
+      appId = await deployContract(
+        values.asset_symbol,
+        values.strike_price,
+        expiryTimestamp,
+        address,
+        peraWallet
+      );
+
+      toast({ title: "Contract Deployed!", description: `App ID: ${appId}` });
+
+    } catch (e: any) {
+      console.error("Deploy failed:", e);
+      toast({ title: "Deployment Failed", description: e.message || "Unknown error", variant: "destructive" });
+      setIsDeploying(false);
+      return;
+    }
+
     const expiryIso = new Date(values.expiry_at).toISOString();
 
     const { error } = await supabase.from("markets").insert({
@@ -57,6 +94,7 @@ export default function MarketCreate() {
       strike_price: values.strike_price,
       expiry_at: expiryIso,
       created_by: user.id,
+      app_id: appId
     });
 
     if (error) {
@@ -163,8 +201,30 @@ export default function MarketCreate() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={!isAdmin.data}>
-                Create market
+              <FormField
+                control={form.control}
+                name="app_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>App ID (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Leave empty to auto-deploy new contract"
+                        type="number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full" disabled={!isAdmin.data || isDeploying}>
+                {isDeploying ? (
+                  <>Deploying Contract...</>
+                ) : (
+                  "Create market & Deploy Contract"
+                )}
               </Button>
             </form>
           </Form>

@@ -1,110 +1,252 @@
+/* Design System - 120fps Optimized */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* AlgoOracle: Cybersecurity Dark (default) */
-    --background: 0 0% 4%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
-    --card: 222 22% 9%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222 22% 9%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    /* Neon Cyan */
-    --primary: 182 100% 50%;
-    --primary-foreground: 0 0% 4%;
-
-    --secondary: 222 18% 14%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
-    --muted: 222 14% 12%;
-    --muted-foreground: 215 20% 70%;
-
-    /* Emerald (Verified/Safe) */
-    --accent: 152 100% 40%;
-    --accent-foreground: 0 0% 4%;
-
-    /* Alert Red */
-    --destructive: 4 100% 59%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 222 14% 18%;
-    --input: 222 14% 18%;
-    --ring: 182 100% 50%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 222 18% 8%;
-
-    --sidebar-foreground: 210 40% 96%;
-
-    --sidebar-primary: 182 100% 50%;
-
-    --sidebar-primary-foreground: 0 0% 4%;
-
-    --sidebar-accent: 222 14% 12%;
-
-    --sidebar-accent-foreground: 210 40% 98%;
-
-    --sidebar-border: 222 14% 18%;
-
-    --sidebar-ring: 182 100% 50%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --radius: 0.75rem;
   }
 
-  .dark {
-    /* Kept for compatibility (same as default) */
-    --background: 0 0% 4%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 22% 9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 22% 9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 182 100% 50%;
-    --primary-foreground: 0 0% 4%;
-
-    --secondary: 222 18% 14%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 222 14% 12%;
-    --muted-foreground: 215 20% 70%;
-
-    --accent: 152 100% 40%;
-    --accent-foreground: 0 0% 4%;
-
-    --destructive: 4 100% 59%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 222 14% 18%;
-    --input: 222 14% 18%;
-    --ring: 182 100% 50%;
-    --sidebar-background: 222 18% 8%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 182 100% 50%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 222 14% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 14% 18%;
-    --sidebar-ring: 182 100% 50%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 120fps Optimizations */
+  * {
+    will-change: auto;
+  }
+
+  .gpu-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+@layer components {
+  /* Unified Page Container */
+  .page-container {
+    @apply min-h-screen bg-gradient-to-b from-background via-background to-background/95;
+  }
+
+  /* Unified Header */
+  .page-header {
+    @apply sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  /* Unified Content Container */
+  .content-container {
+    @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  /* Unified Card */
+  .unified-card {
+    @apply rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm p-6;
+    @apply hover:border-border/80 transition-all duration-300 gpu-accelerate;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .unified-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Smooth Transitions */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-out gpu-accelerate;
+  }
+
+  .smooth-hover {
+    @apply transition-all duration-200 ease-out;
+    transform: translateZ(0);
+  }
+
+  .smooth-hover:hover {
+    transform: translateZ(0) scale(1.02);
+  }
+
+  /* Unified Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3;
+    @apply font-medium text-primary-foreground shadow-sm;
+    @apply hover:bg-primary/90 active:scale-[0.98];
+    @apply transition-all duration-200 gpu-accelerate;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-border/60;
+    @apply bg-secondary/50 px-6 py-3 font-medium text-secondary-foreground;
+    @apply hover:bg-secondary/70 hover:border-border/80 active:scale-[0.98];
+    @apply transition-all duration-200 gpu-accelerate;
+  }
+
+  /* Loading States */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-muted/20;
+  }
+
+  /* Fade Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+    animation-fill-mode: both;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+
+  /* Stagger Children */
+  .stagger-container > * {
+    animation: fadeIn 0.4s ease-out;
+    animation-fill-mode: both;
+  }
+
+  .stagger-container > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-container > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-container > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-container > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-container > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-container > *:nth-child(6) { animation-delay: 0.3s; }
+
+  /* Glassmorphism */
+  .glass {
+    @apply backdrop-blur-xl bg-background/40 border border-border/40;
+    box-shadow: 
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Section Headers */
+  .section-header {
+    @apply mb-8 space-y-2;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent;
+  }
+
+  .section-subtitle {
+    @apply text-muted-foreground text-lg;
+  }
+
+  /* Grid Layouts */
+  .card-grid {
+    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .stat-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-all duration-300 gpu-accelerate;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  /* Focus States */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-border/80;
+  }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Force GPU acceleration for animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95) translateZ(0);
   }
 }
