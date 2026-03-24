@@ -9,71 +9,12 @@ if (typeof window !== 'undefined' && !window.Buffer) {
 }
 
 const ALGOD_TOKEN = "";
-const ALGOD_SERVER = "https://testnet-api.algonode.cloud";
+const ALGOD_SERVER = "https://testnet-api.algonode.cloud"; // Empty placeholder
 const PORT = 443;
 
 export const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, ALGOD_SERVER, PORT);
 
-// Compilation helper
-async function compileProgram(client: algosdk.Algodv2, tealSource: string): Promise<Uint8Array> {
-    const encoder = new TextEncoder();
-    const programBytes = encoder.encode(tealSource);
-    const compileResponse = await client.compile(programBytes).do();
-    return new Uint8Array(Buffer.from(compileResponse.result, "base64"));
-}
 
-export async function deployContract(
-    assetSymbol: string,
-    strikePrice: number,
-    expiryTimestamp: number,
-    senderAddress: string,
-    peraWallet: PeraWalletConnect
-): Promise<number> {
-    console.log("🚀 Deploying contract...", { assetSymbol, strikePrice, expiryTimestamp, senderAddress });
-
-    const params = await algodClient.getTransactionParams().do();
-
-    // Compile programs
-    const approvalProgram = await compileProgram(algodClient, APPROVAL_TEAL);
-    const clearProgram = await compileProgram(algodClient, CLEAR_TEAL);
-
-    // App arguments
-    const appArgs = [
-        new Uint8Array(Buffer.from(assetSymbol)),
-        algosdk.encodeUint64(Math.floor(strikePrice * 100)), // Convert to cents/integers if needed, matching logic
-        algosdk.encodeUint64(expiryTimestamp)
-    ];
-
-    // Create transaction
-    const txn = algosdk.makeApplicationCreateTxnFromObject({
-        sender: senderAddress,
-        suggestedParams: params,
-        onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        approvalProgram: approvalProgram,
-        clearProgram: clearProgram,
-        numGlobalByteSlices: 2,
-        numGlobalInts: 6,
-        numLocalByteSlices: 0,
-        numLocalInts: 2,
-        appArgs: appArgs,
-    });
-
-    // Sign transaction
-    const singleTxnGroups = [{ txn: txn, signers: [senderAddress] }];
-    const signedTxn = await peraWallet.signTransaction([singleTxnGroups]);
-
-    // Send transaction
-    const response = await algodClient.sendRawTransaction(signedTxn).do();
-    const txId = response.txid;
-    console.log("📝 Transaction sent:", txId);
-
-    // Wait for confirmation
-    const confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-    const appId = confirmedTxn["application-index"];
-
-    console.log("✅ Contract deployed! App ID:", appId);
-    return appId;
-}
 export async function optInToContract(
     appId: number,
     userAddress: string,
@@ -205,7 +146,7 @@ export async function claimWinnings(
 
 export async function getContractState(appId: number) {
     try {
-        const response = await fetch(`https://testnet-api.algonode.cloud/v2/applications/${appId}`);
+        const response = await fetch(`${ALGOD_SERVER || 'http://localhost'}/v2/applications/${appId}`);
         const data = await response.json();
 
         const state = data.params?.['global-state'];

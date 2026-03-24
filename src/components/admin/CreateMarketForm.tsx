@@ -34,20 +34,18 @@ export function CreateMarketForm() {
         setIsSubmitting(true);
 
         try {
-            const { data, error } = await supabase
-                .from("markets")
-                .insert({
+            const { data, error } = await supabase.functions.invoke("market-create", {
+                body: {
                     title: formData.title,
                     description: formData.description,
-                    asset_symbol: formData.assetSymbol,
-                    strike_price: Number(formData.strikePrice),
-                    expiry_at: formData.expiryDate.toISOString(),
-                    status: "open",
-                })
-                .select()
-                .single();
+                    assetSymbol: formData.assetSymbol,
+                    strikePrice: Number(formData.strikePrice),
+                    expiryDate: formData.expiryDate.toISOString(),
+                }
+            });
 
             if (error) throw error;
+            if (data?.error) throw new Error(data.error);
 
             toast.success("Market created successfully!", {
                 description: `${formData.title} is now live`,

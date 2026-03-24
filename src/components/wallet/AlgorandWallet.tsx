@@ -124,7 +124,9 @@ export function AlgorandWallet() {
                             )}
                         </p>
                         {balance === 0 && !loading && (
-                            <AlertCircle className="h-4 w-4 text-yellow-500" title="No balance - get TestNet ALGO" />
+                            <span title="No balance - get TestNet ALGO">
+                                <AlertCircle className="h-4 w-4 text-yellow-500" />
+                            </span>
                         )}
                     </div>
                     {balance !== null && balance > 0 && (

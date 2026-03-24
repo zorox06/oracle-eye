@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import algosdk from "npm:algosdk@2.7.0";
 
 const ALGOD_SERVER = "https://testnet-api.algonode.cloud";
-const APP_ID = parseInt(Deno.env.get("VITE_ALGORAND_APP_ID") || "754320381");
+// App ID is picked dynamically per market
 
 // Oracle private key (should be stored securely in production)
 const ORACLE_MNEMONIC = Deno.env.get("ORACLE_MNEMONIC") || "";
@@ -14,8 +14,6 @@ serve(async (req) => {
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const supabase = createClient(supabaseUrl, supabaseKey);
-
-        // Get current time
         const now = new Date();
 
         // Query expired markets that haven't been resolved
@@ -55,8 +53,12 @@ serve(async (req) => {
                 console.log(`Consensus price: $${consensusPrice}, Confidence: ${confidenceScore}%`);
 
                 // 2. Submit resolution to smart contract
+                const APP_ID = market.app_id || parseInt(Deno.env.get("VITE_ALGORAND_APP_ID") || "0");
+                
                 if (!ORACLE_MNEMONIC) {
                     console.warn("No oracle mnemonic configured - skipping blockchain submission");
+                } else if (!APP_ID) {
+                    console.warn("No APP_ID found for market - skipping blockchain submission");
                 } else {
                     const algodClient = new algosdk.Algodv2("", ALGOD_SERVER, "");
                     const privateKey = algosdk.mnemonicToSecretKey(ORACLE_MNEMONIC);

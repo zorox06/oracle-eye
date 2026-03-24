@@ -10,7 +10,6 @@ import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Markets from "./pages/Markets";
-import MarketCreate from "./pages/MarketCreate";
 import NotFound from "./pages/NotFound";
 
 import Trade from "./pages/Trade";
@@ -40,14 +39,6 @@ const App = () => (
               <Route path="/markets" element={<Markets />} />
               <Route path="/trade/:marketId" element={<Trade />} />
               <Route path="/portfolio" element={<Portfolio />} />
-              <Route
-                path="/markets/new"
-                element={
-                  <RequireAuth>
-                    <MarketCreate />
-                  </RequireAuth>
-                }
-              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

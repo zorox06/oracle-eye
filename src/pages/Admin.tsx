@@ -255,7 +255,7 @@ export default function Admin() {
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">APP ID:</span>
-                                    <span className="font-mono">754320381</span>
+                                    <span className="font-mono">0</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Network:</span>
@@ -268,7 +268,7 @@ export default function Admin() {
                                 <Button
                                     variant="outline"
                                     className="w-full mt-4"
-                                    onClick={() => window.open('https://testnet.explorer.perawallet.app/application/754320381/', '_blank')}
+                                    onClick={() => window.open('https://testnet.explorer.perawallet.app/application/0/', '_blank')}
                                 >
                                     View on Explorer
                                 </Button>
